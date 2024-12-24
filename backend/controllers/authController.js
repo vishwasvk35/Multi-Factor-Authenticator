@@ -53,12 +53,64 @@ export async function signup(req, res) {
 }
 
 export async function login(req, res) {
-    res.send("login");
+    try {
+        const { email, password } = req.body;
+
+        const user = await prisma.user.findUnique({
+            where: { email: email }
+        });
+
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email" });
+        }
+
+        const passwordIsValid = bcrypt.compare(password, user.password);
+
+        if (!passwordIsValid) {
+            return res.status(401).json({ message: "Invalid password" });
+        }
+
+        const verificationToken = await generateTokenAndSetCookie(res, user.id);
+
+        await prisma.user.update({
+            where: { email: email },
+            data: {
+                lastLogin: new Date(),
+                verificationToken: verificationToken,
+                verificationTokenExpiresAt: new Date( Date.now() + 7 * 24 * 60 * 60 * 1000)
+            },
+        });
+
+        
+
+        res.status(200).json({
+            message: "Logged in successfully",
+            success: true,
+            user: { ...user, password: undefined }
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({ success: false, message: "login failed" });
+    }
 }
 
 export async function logout(req, res) {
-    res.send("logout");
+    try {
+        // Clear the authentication token cookie
+        res.clearCookie("authToken", {
+            httpOnly: true, // Ensures the cookie is only accessible by the server
+            secure: process.env.NODE_ENV === "production", // Send only over HTTPS in production
+            sameSite: "strict", // Prevent cross-site request forgery
+        });
+
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error("Error during logout:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 }
+
 export async function verifyEmail(req, res) {
     try {
         const email = req.body.email;
