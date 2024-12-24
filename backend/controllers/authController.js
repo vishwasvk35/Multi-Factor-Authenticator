@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import bcrypt from "bcryptjs"
 import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
+import { sendVerificationEmail } from "../mailtrap/sendVerificationMail.js";
 
 export async function signup(req, res) {
     const email = req.body.email;
@@ -13,17 +14,19 @@ export async function signup(req, res) {
         return res.status(400).json({ message: "Please fill in all fields" });
     }
 
-    const userAlreadyExists = await prisma.user.findUnique({ where: { email } });
+    const userAlreadyExists = await prisma.user.findUnique({ where: { email } }); //find user by email
 
-    
+
     console.log(userAlreadyExists);
 
     if (userAlreadyExists) {
-        return res.status(400).json({ message: "User already exists", userAlreadyExists } );
+        return res.status(400).json({ message: "User already exists", userAlreadyExists });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationToken = Math.floor(10000 + Math.random() * 90000).toString();
+    const hashedPassword = await bcrypt.hash(password, 10); //hash password with bcrypt
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString(); //generate random verification token
+
+    console.log("create user");
     const user = await prisma.user.create({
         data: {
             email,
@@ -32,18 +35,21 @@ export async function signup(req, res) {
             verificationToken,
             verificationTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         }
-    });
+    }); //create user with hashed password and verification token
 
-    generateTokenAndSetCookie(
+    await generateTokenAndSetCookie(
         res,
         user.id,
-    );
+    ); //generate token and set cookie with user id
+
+    console.log("send verification email");
+    await sendVerificationEmail(email, verificationToken);
 
     res.status(201).json({
         message: "User created successfully",
         success: true,
-        user: {...user, password:undefined}
-    })
+        user: { ...user, password: undefined }
+    }) //return user data with password removed
 }
 
 export async function login(req, res) {

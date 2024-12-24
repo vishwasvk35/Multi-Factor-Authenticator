@@ -3,14 +3,14 @@ import {apiRoutes} from "./routes/authRoutes.js"
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
-app.use(express.json());
-const prisma = new PrismaClient();
+app.use(express.json()); //middleware
+const prisma = new PrismaClient(); // Prisma client instance
 
-app.get('/', (req, res)=>{
-    res.send("Hello world of web dev");
+app.get('/', (req, res)=>{ // route for root URL
+    res.send("Hello world of web dev"); // send response back to client
 })
 
-app.use('/api/auth', apiRoutes); //create multiple api routes like signup, login, signin
+app.use('/api/auth', apiRoutes); // use auth routes for all requests to /api/auth
 
 app.listen(3000, ()=>{
     console.log('backend running on port 3000');
