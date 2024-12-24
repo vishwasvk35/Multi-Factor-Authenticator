@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import bcrypt from "bcryptjs"
 import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
-import { sendVerificationEmail } from "../mailtrap/sendVerificationMail.js";
+import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js";
 
 export async function signup(req, res) {
     const email = req.body.email;
@@ -58,4 +58,46 @@ export async function login(req, res) {
 
 export async function logout(req, res) {
     res.send("logout");
+}
+export async function verifyEmail(req, res) {
+    try {
+        const email = req.body.email;
+        const code = req.body.code;
+
+        if (!email || !code) {
+            return res.status(400).json({ message: "Email and code are required" });
+        }
+
+        const user = await prisma.user.findFirst({
+            where: {
+                email: email,
+                verificationToken: code,
+                verificationTokenExpiresAt: {
+                    gte: new Date(), // Check if the token is not expired
+                },
+            },
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid email or verification code" });
+        }
+
+        // Update the user's verification status
+        await prisma.user.update({
+            where: { email: email },
+            data: {
+                verificationToken: null,
+                verificationTokenExpiresAt: null,
+                isVerified: true,
+            },
+        });
+
+        // Send the welcome email
+        await sendWelcomeEmail(user.email, user.name);
+
+        res.status(200).json({ message: "Email verified successfully" });
+    } catch (error) {
+        console.error("Error verifying email:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 }
