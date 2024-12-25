@@ -1,6 +1,6 @@
 import { response } from "express";
 import { mailClient, sender } from "./mailtrapConfig.js";
-import { VERIFICATION_EMAIL_TEMPLATE } from "./TEMPLATE/verification.js";
+import { VERIFICATION_EMAIL_TEMPLATE, PASSWORD_RESET_REQUEST_TEMPLATE } from "./TEMPLATE/template.js";
 
 export async function sendVerificationEmail(email, verificationToken) {
     console.log(email);
@@ -41,4 +41,24 @@ export async function sendWelcomeEmail(email, name){
         }
       })
       .then(console.log, console.error);
+}
+
+export async function sendResetEmail(email, resetURL) {
+  const recipients = [
+    { email: email}
+  ];
+
+  try {
+    const response = await mailClient.send({
+      from: sender,
+      to: recipients,
+      subject: "Reset your password",
+      html: PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL),
+      category: "resetPassword"
+    });
+  
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
 }

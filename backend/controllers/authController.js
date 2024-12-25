@@ -1,9 +1,11 @@
-import express from "express";
+import bcrypt from "bcryptjs"
+
+import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
+import { sendVerificationEmail, sendWelcomeEmail, sendResetEmail } from "../mailtrap/email.js";
+
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-import bcrypt from "bcryptjs"
-import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
-import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js";
+
 
 export async function signup(req, res) {
     const email = req.body.email;
@@ -150,6 +152,40 @@ export async function verifyEmail(req, res) {
         res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
         console.error("Error verifying email:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export async function forgotPassword(req, res) {
+    const email = req.body.email;
+
+    try {
+        // Check if the user exists
+        const user = await prisma.user.findUnique({ where: { email: email } });
+
+        if (!user) {
+            return res.status(404).json({ message: "User  not found" });
+        }
+
+        // Generate a reset token
+        const resetToken = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a random token
+        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // Token valid for 1 hour
+
+        // Update the user record with the reset token and expiration
+        await prisma.user.update({
+            where: { email: email },
+            data: {
+                resetPasswordToken: resetToken,
+                resetPasswordExpiresAt: resetTokenExpiresAt,
+            },
+        });
+
+        // Send the reset email
+        await sendResetEmail(email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+
+        res.status(200).json({ message: "Reset email sent successfully" });
+    } catch (error) {
+        console.error("Error during password reset:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 }
