@@ -230,3 +230,22 @@ export async function resetPassword(req, res) {
     }
 }
 
+export async function checkAuth(req, res) {
+    try {
+        const userId = req.userId;
+
+        const user = await prisma.user.findFirst({where: {id: userId}});
+
+        if(!user){
+            return res.status(401).json({success: false, message: "User not found"});
+        }
+
+        res.status(200).json({  success: true , user: {
+            ...user,
+            password: undefined
+        } });
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({success: false, message: "error fetching user"});
+    }
+}

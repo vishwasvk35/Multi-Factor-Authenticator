@@ -1,9 +1,12 @@
 import express from "express"
+import cookieParser from "cookie-parser";
 import {apiRoutes} from "./routes/authRoutes.js"
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
 app.use(express.json()); //middleware
+app.use(cookieParser()); //middleware to parse cookies
+
 const prisma = new PrismaClient(); // Prisma client instance
 
 app.get('/', (req, res)=>{ // route for root URL

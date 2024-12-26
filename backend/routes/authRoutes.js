@@ -1,7 +1,10 @@
 import { Router } from "express"
 import * as auth from "../controllers/authController.js"
+import { verifyToken } from "../middleware/verifyToken.js";
 
 export const apiRoutes = Router();
+
+apiRoutes.get('/check-auth', verifyToken, auth.checkAuth);
 
 apiRoutes.post('/signup', auth.signup);
 apiRoutes.post('/login', auth.login)
