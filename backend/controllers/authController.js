@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs"
 
 import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
-import { sendVerificationEmail, sendWelcomeEmail, sendResetEmail } from "../mailtrap/email.js";
+import { sendVerificationEmail, sendWelcomeEmail, sendResetEmail, sendResetSuccessEmail } from "../mailtrap/email.js";
 
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
@@ -79,11 +79,11 @@ export async function login(req, res) {
             data: {
                 lastLogin: new Date(),
                 verificationToken: verificationToken,
-                verificationTokenExpiresAt: new Date( Date.now() + 7 * 24 * 60 * 60 * 1000)
+                verificationTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             },
         });
 
-        
+
 
         res.status(200).json({
             message: "Logged in successfully",
@@ -169,7 +169,7 @@ export async function forgotPassword(req, res) {
 
         // Generate a reset token
         const resetToken = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a random token
-        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // Token valid for 1 hour
+        const resetTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Token valid for 1 hour
 
         // Update the user record with the reset token and expiration
         await prisma.user.update({
@@ -189,3 +189,44 @@ export async function forgotPassword(req, res) {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+export async function resetPassword(req, res) {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    try {
+        const currUser = await prisma.user.findFirst({
+            where: {
+                resetPasswordToken: token,
+                resetPasswordExpiresAt: { gte: new Date() }
+            }
+        });
+
+        console.log(token, currUser);
+
+        if (!currUser) {
+            return res.status(404).json({ message: "reset token is invalid or has expired" });
+        }
+
+        const email = currUser.email;
+        console.log(email);
+        const newPassword = await bcrypt.hash(password, 10);
+
+        await prisma.user.update({
+            where: { email: email },
+            data: {
+                password: newPassword,
+                resetPasswordToken: undefined,
+                resetPasswordExpiresAt: undefined,
+            },
+        });
+
+        await sendResetSuccessEmail(currUser.email);
+
+        res.status(200).json({ success: true, message: "password reset successfully" });
+    } catch (error) {
+        console.error("Error during password reset:", error);
+        res.status(401).json({  success:false, message: `cannot reset password: ${error}`});
+    }
+}
+
