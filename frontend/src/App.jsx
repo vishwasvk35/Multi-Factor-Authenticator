@@ -3,6 +3,7 @@ import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import SignUpPage from './pages/signUpPage'
 import LoginPage from './pages/logInPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path='/' element={<h1 className='text-red-500 text-5xl font-bold'>Home</h1>} />
         <Route path='/signup' element={<SignUpPage />} />
         <Route path='/login' element={<LoginPage />} />
+        <Route path='/verify-email' element ={<VerifyEmailPage />} ></Route>
       </Routes>
 
     </div>

@@ -5,6 +5,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import PassworkChecker from "../components/PasswordChecker";
 import { LucideUser, LucideMail, LucideLock } from "lucide-react";
+import VerifyEmailPage from "./VerifyEmailPage";
 
 const SignUpPage = () => {
   const [username, setUsername] = useState("");
