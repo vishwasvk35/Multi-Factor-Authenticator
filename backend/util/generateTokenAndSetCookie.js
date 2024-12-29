@@ -14,5 +14,7 @@ export async function generateTokenAndSetCookie(res, userId) {
         }
     )
 
+    console.log(res.cookie);
+
     return token;
 }

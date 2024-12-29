@@ -1,24 +1,40 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/AuthStore";
+import { useNavigate } from "react-router-dom";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
 import PassworkChecker from "../components/PasswordChecker";
-import { LucideUser, LucideMail, LucideLock } from "lucide-react";
-import VerifyEmailPage from "./VerifyEmailPage";
+import { LucideUser, LucideMail, LucideLock, Loader } from "lucide-react";
 
 const SignUpPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const signup = useAuthStore().signup;
+  const {isLoading, error} = useAuthStore();
+  const navigate = useNavigate();
+
+  async function handleClick(event) {
+    event.preventDefault();
+
+    try {
+      await signup({name: username, email, password});
+      navigate('/verify-email');
+    } catch (error) {
+      
+    }
+  }
+
   return (
-    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
-      <h1 className="text-4xl font-mono text-blue-500 mb-6 m-7 text-center">
+    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md m-5">
+      <h1 className="text-4xl font-medium text-blue-500 mb-6 m-7 text-center">
         Create Account
       </h1>
 
-      <form className="grid gap-5 m-7" action="post">
+      <form onSubmit={handleClick} className="grid gap-5 m-7" action="post">
         <Input
           Icon={LucideUser}
           type="text"
@@ -38,8 +54,12 @@ const SignUpPage = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Button type="text" placeholder="Sign Up" />
+        <Button type="text" 
+        placeholder={  isLoading ? <Loader className="animate-spin mx-auto" size={24} /> : "signup" }
+        />
       </form>
+
+      {error && <p className="text-red-500 ml-7">{error}</p>}
 
       <div className="password-strength mt-6 m-7">
         <PassworkChecker password={password} />

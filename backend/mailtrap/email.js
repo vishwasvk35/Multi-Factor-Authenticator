@@ -13,7 +13,7 @@ export async function sendVerificationEmail(email, verificationToken) {
       from: sender,
       to: recipients,
       subject: "Verify your email",
-      html: VERIFICATION_EMAIL_TEMPLATE.replace("{verificationToken}", verificationToken),
+      html: VERIFICATION_EMAIL_TEMPLATE.replace("{verificationCode}", verificationToken),
       category: "verification",
     });
 

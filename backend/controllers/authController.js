@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs"
 
 import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
 import { sendVerificationEmail, sendWelcomeEmail, sendResetEmail, sendResetSuccessEmail } from "../mailtrap/email.js";
+import jsonwebtoken, { decode } from "jsonwebtoken";
 
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
@@ -16,42 +17,47 @@ export async function signup(req, res) {
         return res.status(400).json({ message: "Please fill in all fields" });
     }
 
-    const userAlreadyExists = await prisma.user.findUnique({ where: { email } }); //find user by email
+    try {
+
+        const userAlreadyExists = await prisma.user.findUnique({ where: { email } }); //find user by email
 
 
-    console.log(userAlreadyExists);
+        console.log(userAlreadyExists);
 
-    if (userAlreadyExists) {
-        return res.status(400).json({ message: "User already exists", userAlreadyExists });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10); //hash password with bcrypt
-    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString(); //generate random verification token
-
-    console.log("create user");
-    const user = await prisma.user.create({
-        data: {
-            email,
-            password: hashedPassword,
-            name,
-            verificationToken,
-            verificationTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        if (userAlreadyExists) {
+            return res.status(409).json({ message: "User already exists", userAlreadyExists });
         }
-    }); //create user with hashed password and verification token
 
-    await generateTokenAndSetCookie(
-        res,
-        user.id,
-    ); //generate token and set cookie with user id
+        const hashedPassword = await bcrypt.hash(password, 10); //hash password with bcrypt
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString(); //generate random verification token
 
-    console.log("send verification email");
-    await sendVerificationEmail(email, verificationToken);
+        console.log("create user");
+        const user = await prisma.user.create({
+            data: {
+                email,
+                password: hashedPassword,
+                name,
+                verificationToken,
+                verificationTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            }
+        }); //create user with hashed password and verification token
 
-    res.status(201).json({
-        message: "User created successfully",
-        success: true,
-        user: { ...user, password: undefined }
-    }) //return user data with password removed
+        await generateTokenAndSetCookie(
+            res,
+            user.id,
+        ); //generate token and set cookie with user id
+
+        console.log("send verification email");
+        await sendVerificationEmail(email, verificationToken);
+
+        res.status(201).json({
+            message: "User created successfully",
+            success: true,
+            user: { ...user, password: undefined }
+        }) //return user data with password removed
+    } catch (error) {
+        res.status(500).json({ message: "Error creating user", error });
+    }
 }
 
 export async function login(req, res) {
@@ -115,30 +121,33 @@ export async function logout(req, res) {
 
 export async function verifyEmail(req, res) {
     try {
-        const email = req.body.email;
-        const code = req.body.code;
-
-        if (!email || !code) {
-            return res.status(400).json({ message: "Email and code are required" });
+        const code = req.body.verificationCode;
+        if (!code) {
+            return res.status(400).json({ message: "verification code is not enterted" });
         }
+
+        const token = req.cookies.token;
+        const decoded = jsonwebtoken.verify(token, process.env.SECRET_KEY);
+        const userId = decoded.userId;
+
 
         const user = await prisma.user.findFirst({
             where: {
-                email: email,
-                verificationToken: code,
-                verificationTokenExpiresAt: {
-                    gte: new Date(), // Check if the token is not expired
-                },
+                id: userId,
             },
         });
 
-        if (!user) {
-            return res.status(400).json({ message: "Invalid email or verification code" });
+        if(user.isVerified){
+            return res.status(409).json({ message: "user is already verified" });
+        }
+
+        if(!user.verificationToken == code || ! user.verificationTokenExpiresAt >=  new Date()){
+            return res.status(409).json({ message: "Invalid email or verification code" });
         }
 
         // Update the user's verification status
         await prisma.user.update({
-            where: { email: email },
+            where: { id: userId },
             data: {
                 verificationToken: null,
                 verificationTokenExpiresAt: null,
@@ -226,7 +235,7 @@ export async function resetPassword(req, res) {
         res.status(200).json({ success: true, message: "password reset successfully" });
     } catch (error) {
         console.error("Error during password reset:", error);
-        res.status(401).json({  success:false, message: `cannot reset password: ${error}`});
+        res.status(401).json({ success: false, message: `cannot reset password: ${error}` });
     }
 }
 
@@ -234,18 +243,20 @@ export async function checkAuth(req, res) {
     try {
         const userId = req.userId;
 
-        const user = await prisma.user.findFirst({where: {id: userId}});
+        const user = await prisma.user.findFirst({ where: { id: userId } });
 
-        if(!user){
-            return res.status(401).json({success: false, message: "User not found"});
+        if (!user) {
+            return res.status(401).json({ success: false, message: "User not found" });
         }
 
-        res.status(200).json({  success: true , user: {
-            ...user,
-            password: undefined
-        } });
+        res.status(200).json({
+            success: true, user: {
+                ...user,
+                password: undefined
+            }
+        });
     } catch (error) {
         console.log(error);
-        res.status(404).json({success: false, message: "error fetching user"});
+        res.status(404).json({ success: false, message: "error fetching user" });
     }
 }
