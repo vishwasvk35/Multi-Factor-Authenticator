@@ -3,7 +3,7 @@ import jsonwebtoken, { decode } from "jsonwebtoken";
 export async function verifyToken(req, res, next) {
     const token = req.cookies.token;
     if(!token){
-        return res.status(401).json({ message: "Unauthorized - token not found" });
+        return res.status(409).json({ message: "Unauthorized - token not found" });
     }
 
     try {

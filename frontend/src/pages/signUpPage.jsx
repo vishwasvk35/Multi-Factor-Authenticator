@@ -13,23 +13,22 @@ const SignUpPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const signup = useAuthStore().signup;
-  const {isLoading, error} = useAuthStore();
+  const {signup, isLoading, error } = useAuthStore();
   const navigate = useNavigate();
 
   async function handleClick(event) {
     event.preventDefault();
 
     try {
-      await signup({name: username, email, password});
-      navigate('/verify-email');
-    } catch (error) {
-      
-    }
+      await signup({ name: username, email, password });
+      navigate("/verify-email");
+    } catch (error) {}
   }
 
+  const state = useAuthStore.getState();
+
   return (
-    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md m-5">
+    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
       <h1 className="text-4xl font-medium text-blue-500 mb-6 m-7 text-center">
         Create Account
       </h1>
@@ -54,12 +53,21 @@ const SignUpPage = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Button type="text" 
-        placeholder={  isLoading ? <Loader className="animate-spin mx-auto" size={24} /> : "signup" }
+        <Button
+          type="text"
+          placeholder={
+            isLoading ? (
+              <Loader className="animate-spin mx-auto" size={24} />
+            ) : (
+              "signup"
+            )
+          }
         />
       </form>
 
-      {error && <p className="text-red-500 ml-7">{error}</p>}
+      
+      <p className="text-red-500 text-center">{state?.error ? state.error : " "}</p>
+      {console.log(error)}
 
       <div className="password-strength mt-6 m-7">
         <PassworkChecker password={password} />

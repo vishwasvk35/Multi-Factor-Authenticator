@@ -61,6 +61,7 @@ export async function signup(req, res) {
 }
 
 export async function login(req, res) {
+    console.log("authcontroller")
     try {
         const { email, password } = req.body;
 
@@ -106,7 +107,7 @@ export async function login(req, res) {
 export async function logout(req, res) {
     try {
         // Clear the authentication token cookie
-        res.clearCookie("authToken", {
+        res.clearCookie("token", {
             httpOnly: true, // Ensures the cookie is only accessible by the server
             secure: process.env.NODE_ENV === "production", // Send only over HTTPS in production
             sameSite: "strict", // Prevent cross-site request forgery
@@ -136,6 +137,8 @@ export async function verifyEmail(req, res) {
                 id: userId,
             },
         });
+
+        console.log(user);
 
         if(user.isVerified){
             return res.status(409).json({ message: "user is already verified" });
@@ -250,7 +253,8 @@ export async function checkAuth(req, res) {
         }
 
         res.status(200).json({
-            success: true, user: {
+            success: true,
+            user: {
                 ...user,
                 password: undefined
             }

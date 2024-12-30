@@ -3,12 +3,23 @@ import { Link } from "react-router-dom";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
-import PassworkChecker from "../components/PasswordChecker";
 import { LucideMail, LucideLock } from "lucide-react";
+import { useAuthStore } from "../store/AuthStore";
+import { Loader } from "lucide-react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const {login, isLoading, error } = useAuthStore();
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    try {
+      await login(email, password );
+      navigate("/");
+    } catch (error) {}
+  }
 
   return (
     <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
@@ -16,7 +27,7 @@ const LoginPage = () => {
         Login
       </h1>
 
-      <form className="grid gap-5 m-7" action="post">
+      <form  onSubmit={ e => handleSubmit(e)} className="grid gap-5 m-7" action="post">
         <Input
           Icon={LucideMail}
           type="text"
@@ -36,8 +47,10 @@ const LoginPage = () => {
             <span className="text-gray-800 hover:text-blue-800  ml-3" >Forgot password?</span>
           </Link>
 
-        <Button type="text" placeholder="Log In" />
+        <Button type="submit" placeholder={isLoading ? <Loader className="animate-spin mx-24" size={24} /> : "Log In"}  />
       </form>
+
+      <p className="text-red-500 text-center">{error ? error : " "}</p>
 
       <div className="loginLink text-center mt-4 bg-gray-800 bg-opacity-75 rounded-b-xl">
         <p className="text-gray-400 text-sm h-12 flex items-center justify-center">
