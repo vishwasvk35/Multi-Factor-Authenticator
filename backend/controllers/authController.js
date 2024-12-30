@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs"
-
 import { generateTokenAndSetCookie } from "../util/generateTokenAndSetCookie.js";
 import { sendVerificationEmail, sendWelcomeEmail, sendResetEmail, sendResetSuccessEmail } from "../mailtrap/email.js";
 import jsonwebtoken, { decode } from "jsonwebtoken";
@@ -170,6 +169,8 @@ export async function verifyEmail(req, res) {
 
 export async function forgotPassword(req, res) {
     const email = req.body.email;
+    console.log(email);
+    console.log("hello");
 
     try {
         // Check if the user exists
@@ -217,7 +218,7 @@ export async function resetPassword(req, res) {
         console.log(token, currUser);
 
         if (!currUser) {
-            return res.status(404).json({ message: "reset token is invalid or has expired" });
+            return res.status(404).json({success:true, message: "reset token is invalid or has expired" });
         }
 
         const email = currUser.email;

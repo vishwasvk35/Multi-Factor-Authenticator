@@ -28,7 +28,7 @@ const SignUpPage = () => {
   const state = useAuthStore.getState();
 
   return (
-    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div className="bg-slate-800 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
       <h1 className="text-4xl font-medium text-blue-500 mb-6 m-7 text-center">
         Create Account
       </h1>
@@ -70,6 +70,7 @@ const SignUpPage = () => {
       {console.log(error)}
 
       <div className="password-strength mt-6 m-7">
+        <h2 className="my-3">we recommend using a strong password</h2>
         <PassworkChecker password={password} />
       </div>
 

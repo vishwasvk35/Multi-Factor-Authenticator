@@ -20,13 +20,3 @@ const recipients = [
     email: "vishwasvk35@gmail.com",
   }
 ];
-
-// mailClient
-//   .send({
-//     from: sender,
-//     to: recipients,
-//     subject: "You are awesome!",
-//     html: "<h1>Congrats for sending test email with Mailtrap!</h1>",
-//     category: "Integration Test",
-//   })
-//   .then(console.log, console.error);

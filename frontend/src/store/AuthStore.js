@@ -126,11 +126,38 @@ export const useAuthStore = create((set) => ({
 			const response = await apiClient.post(`/logout`);
       console.log(response.data);
 			set({ user: null, isAuthenticated: false, error: null, isLoading: false });
-      // console.log(user);
 		} catch (error) {
 			set({ error: "Error logging out", isLoading: false });
 			throw error;
 		}
 	},
-  
+
+  forgotPassword: async (email) => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await apiClient.post(`/forgot-password`, { email });
+			set({ isLoading: false });
+      return response;
+		} catch (error) {
+			set({
+				isLoading: false,
+				error: error.response.data.message || "Error sending reset password email",
+			});
+			throw error;
+		}
+	},
+
+  resetPassword: async (token, password) => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await apiClient.post(`/reset-password/${token}`, { password });
+			set({ message: response.data.message, isLoading: false });
+		} catch (error) {
+			set({
+				isLoading: false,
+				error: error.response.data.message || "Error resetting password",
+			});
+			throw error;
+		}
+	},
 }));

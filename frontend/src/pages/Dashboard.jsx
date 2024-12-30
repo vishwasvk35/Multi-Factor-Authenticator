@@ -2,11 +2,12 @@ import { useAuthStore } from "../store/AuthStore";
 import Button from "../components/Button";
 
 const DashboardPage = () => {
-  const { user, logout } = useAuthStore();
+  const {user, logout } = useAuthStore();
 
   const handleLogout = () => {
     logout();
   };
+  
   return (
     <div className="bg-slate-900 p-7 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
       <h2 className="text-4xl font-medium text-center mb-7 text-blue-500 mb-6text-center">
@@ -39,7 +40,7 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        <div onClick={logout}>
+        <div onClick={handleLogout}>
           <Button  type="button" placeholder="Logout" />
         </div>
       </div>

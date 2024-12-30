@@ -22,7 +22,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div className="bg-slate-800 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
       <h1 className="text-4xl font-mono text-blue-500 mb-6 m-7 text-center">
         Login
       </h1>
@@ -42,9 +42,9 @@ const LoginPage = () => {
         />
 
           <Link
-            to={"/reset-password"}
+            to={"/forgot-password"}
           >
-            <span className="text-gray-800 hover:text-blue-800  ml-3" >Forgot password?</span>
+            <span className="text-gray-500 hover:text-blue-300  ml-3" >Forgot password?</span>
           </Link>
 
         <Button type="submit" placeholder={isLoading ? <Loader className="animate-spin mx-24" size={24} /> : "Log In"}  />

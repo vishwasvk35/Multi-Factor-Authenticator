@@ -5,10 +5,13 @@ import SignUpPage from "./pages/signUpPage";
 import LoginPage from "./pages/logInPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import DashboardPage from "./pages/Dashboard";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "./store/AuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const { checkAuth, isCheckingAuth } = useAuthStore();
@@ -46,6 +49,8 @@ function App() {
     <div class="min-h-screen bg-gradient-to-tr from-blue-700 to-purple-700 h-screen w-full flex items-center justify-center">
       {/* <h1 className='text-red-500 text-5xl font-bold'>My React App</h1> */}
 
+      <Toaster />
+
       {isCheckingAuth ? (
         <Loader className="animate-spin mx-24" size={24} />
       ) : (
@@ -82,6 +87,24 @@ function App() {
             element={
               <RedirectAuthenticatedUser>
                 <VerifyEmailPage />
+              </RedirectAuthenticatedUser>
+            }
+          />
+
+          <Route
+            path="/forgot-password"
+            element={
+              <RedirectAuthenticatedUser>
+                <ForgotPasswordPage />
+              </RedirectAuthenticatedUser>
+            }
+          />
+
+          <Route
+            path="/reset-password/:token"
+            element={
+              <RedirectAuthenticatedUser>
+                <ResetPasswordPage />
               </RedirectAuthenticatedUser>
             }
           />
