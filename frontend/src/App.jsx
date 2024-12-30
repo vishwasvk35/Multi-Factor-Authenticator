@@ -47,7 +47,6 @@ function App() {
 
   return (
     <div class="min-h-screen bg-gradient-to-tr from-blue-700 to-purple-700 h-screen w-full flex items-center justify-center">
-      {/* <h1 className='text-red-500 text-5xl font-bold'>My React App</h1> */}
 
       <Toaster />
 

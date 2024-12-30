@@ -68,11 +68,15 @@ export async function login(req, res) {
             where: { email: email }
         });
 
+        console.log(password);
+
         if (!user) {
             return res.status(401).json({ message: "Invalid email" });
         }
 
-        const passwordIsValid = bcrypt.compare(password, user.password);
+        const passwordIsValid = await bcrypt.compare(password, user.password);
+
+        console.log(passwordIsValid);
 
         if (!passwordIsValid) {
             return res.status(401).json({ message: "Invalid password" });
