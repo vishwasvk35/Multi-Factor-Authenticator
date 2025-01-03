@@ -8,7 +8,7 @@ import path from "path";
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173", // Replace with your frontend's origin
+    origin: process.env.NODE_ENV=="development" ? "http://localhost:5173" : "https://advanced-authenticator.netlify.app", // Replace with your frontend's origin
     credentials: true, // Allow credentials
 }));
 

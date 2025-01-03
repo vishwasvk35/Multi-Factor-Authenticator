@@ -3,7 +3,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const apiClient = axios.create({
-  baseURL: process.env.NODE_ENV===development ?  "http://localhost:3000/api/auth" : "/api/auth",
+  baseURL: process.env.NODE_ENV==="development" ?  "http://localhost:3000/api/auth" : "/api/auth",
   withCredentials: true,
 });
 
