@@ -32,7 +32,6 @@ export const useAuthStore = create((set) => ({
       // Update store on successful signup
       set({
         user: response.data.user,
-        isAuthenticated: true,
         isLoading: false,
         error: null,
       });

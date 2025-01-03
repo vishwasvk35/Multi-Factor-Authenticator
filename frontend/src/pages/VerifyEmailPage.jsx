@@ -64,7 +64,7 @@ function VerifyEmailPage() {
   };
 
   return (
-    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl m-5 w-full max-w-md">
+    <div className="bg-slate-300 bg-opacity-10 border-gray-800 rounded-xl shadow-2xl m-7 w-full max-w-md">
       <h2 className="text-4xl font-medium text-blue-500 mb-6 m-7 text-center">
         Verify Email
       </h2>

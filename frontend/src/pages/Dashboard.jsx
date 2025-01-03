@@ -9,7 +9,7 @@ const DashboardPage = () => {
   };
   
   return (
-    <div className="bg-slate-900 p-7 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div className="bg-slate-900 p-7 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md m-7">
       <h2 className="text-4xl font-medium text-center mb-7 text-blue-500 mb-6text-center">
         Dashboard
       </h2>

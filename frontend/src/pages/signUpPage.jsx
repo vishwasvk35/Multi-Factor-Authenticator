@@ -28,7 +28,7 @@ const SignUpPage = () => {
   const state = useAuthStore.getState();
 
   return (
-    <div className="bg-slate-800 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div className="bg-slate-800 bg-opacity-30 border-gray-800 rounded-xl shadow-2xl w-full max-w-md m-7">
       <h1 className="text-4xl font-medium text-blue-500 mb-6 m-7 text-center">
         Create Account
       </h1>

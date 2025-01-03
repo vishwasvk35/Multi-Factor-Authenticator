@@ -28,7 +28,7 @@ function App() {
       if (state.isAuthenticated) {
         navigate("/");
       }
-    }, [state.isAuthenticated, navigate]);
+    }, [state.isAuthenticated]);
 
     return children;
   };
